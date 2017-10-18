@@ -301,7 +301,7 @@ public class Graph {
   void showDirectedGraph() {
     String dotFormat = getAllPath();
     createDotGraph(dotFormat, "DotGraph");
-    new showImage("DotGraph.jpg");
+    new ShowImage("DotGraph.jpg");
   }
 
   /**
@@ -314,7 +314,7 @@ public class Graph {
     word2 = word2.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
     if (words.contains(word1) && words.contains(word2)) {
       Dijkstra(wordMap.get(word1), wordMap.get(word2), "Calc");
-      new showImage("DotGraphCalc.jpg");
+      new ShowImage("DotGraphCalc.jpg");
     } else {
       System.out.println("No " + word1 + " or " + word2 + " in the graph!");
     }
@@ -332,7 +332,7 @@ public class Graph {
       for (int i = 0 ; i < words.size(); i ++) {
         Dijkstra(wordMap.get(word1), i, word1 + "To" + words.get(i));
         if (i == rand) {
-          new showImage("DotGraph" + word1 + "To" + words.get(i) + ".jpg");
+          new ShowImage("DotGraph" + word1 + "To" + words.get(i) + ".jpg");
         }
       }
     } else {
