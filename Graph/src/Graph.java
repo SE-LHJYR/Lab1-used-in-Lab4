@@ -5,62 +5,67 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.Stack;
 
 public class Graph {
   public static final int MAX = 99999;
-  private List<String> words;  //单词列表
-  private Map<String, Integer> wordMap;  //将单词映射为编号
-  private int[][] value;  //表示图的二维矩阵
-  private boolean[][] pathFlag;  //表示最短路径的矩阵，便于将路径高亮显示
+  private List<String> words; // 单词列表
+  private Map<String, Integer> wordMap; // 将单词映射为编号
+  private int[][] value; // 表示图的二维矩阵
+  private boolean[][] pathFlag; // 表示最短路径的矩阵，便于将路径高亮显示
 
   /**
-   * 读取文件，处理文件内容
+   * 读取文件，处理文件内容.
+   * 
    * @param filePath 要读取的文件路径
    * @return 读取成功返回true
    */
   private boolean createDirectedGraph(String filename) {
     File inputFile = new File(filename);
     try {
-      BufferedReader bReader = new BufferedReader(
-          new InputStreamReader(
-              new FileInputStream(inputFile), "utf8"));
+      BufferedReader buffReader =
+          new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), "utf8"));
       words = new ArrayList<>();
       wordMap = new HashMap<>();
-      List<String> tempWordList = new ArrayList<>();  //临时保存所有单词，从而分析边和权重
-      while (bReader.ready()) {
-        //按行读入
-        String line = bReader.readLine().replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
+      List<String> tempWordList = new ArrayList<>(); // 临时保存所有单词，从而分析边和权重
+      while (buffReader.ready()) {
+        // 按行读入
+        String line = buffReader.readLine().replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
         line = line.replaceAll("\\W+", " ");
         String[] lineArray = line.split(" ");
         for (String word : lineArray) {
-          if (! word.equals("")) {  //空格处理
-            word = word.toLowerCase();  //均视为小写
+          if (!word.equals("")) { // 空格处理
+            word = word.toLowerCase(); // 均视为小写
             tempWordList.add(word);
-            if (! wordMap.containsKey(word)) {
-              //尚未加入words，建立新的映射
+            if (!wordMap.containsKey(word)) {
+              // 尚未加入words，建立新的映射
               words.add(word);
-              wordMap.put(word, words.size()-1);
+              wordMap.put(word, words.size() - 1);
             }
           }
         }
       }
-      //建立矩阵并计算权重
+      // 建立矩阵并计算权重
       value = new int[words.size()][words.size()];
       pathFlag = new boolean[words.size()][words.size()];
-      for (int i = 0; i < words.size(); i ++) {
-        for (int j = 0; j < words.size(); j ++) {
+      for (int i = 0; i < words.size(); i++) {
+        for (int j = 0; j < words.size(); j++) {
           pathFlag[i][j] = false;
         }
       }
-      String startWord = words.get(0);  //边的起点
+      String startWord = words.get(0); // 边的起点
       for (int i = 1; i < tempWordList.size(); i++) {
         String endWord = tempWordList.get(i);
-        value[wordMap.get(startWord)][wordMap.get(endWord)]++;  //权重+1
+        value[wordMap.get(startWord)][wordMap.get(endWord)]++; // 权重+1
         startWord = endWord;
       }
-      bReader.close();
+      buffReader.close();
     } catch (FileNotFoundException e) {
       return false;
     } catch (UnsupportedEncodingException e) {
@@ -76,7 +81,8 @@ public class Graph {
   }
 
   /**
-   * 查询两个单词间的桥接词
+   * 查询两个单词间的桥接词.
+   * 
    * @param startWord 单词1
    * @param endWord 单词2
    * @return 单词1或2如不存在则返回Null，否则返回桥接词List
@@ -86,12 +92,12 @@ public class Graph {
     endWord = endWord.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
     if (wordMap.containsKey(startWord) && wordMap.containsKey(endWord)) {
       List<String> result = new ArrayList<>();
-      int startIndex = wordMap.get(startWord);  //起点
-      int endIndex = wordMap.get(endWord);  //终点
+      int startIndex = wordMap.get(startWord); // 起点
+      int endIndex = wordMap.get(endWord); // 终点
       for (int i = 0; i < value[startIndex].length; i++) {
-        //遍历起点的所有邻接点
+        // 遍历起点的所有邻接点
         if (value[startIndex][i] > 0 && value[i][endIndex] > 0) {
-          //i为桥接点
+          // i为桥接点
           result.add(words.get(i));
         }
       }
@@ -103,112 +109,112 @@ public class Graph {
   }
 
   /**
-   * 根据文本及其桥接词获得新文本
+   * 根据文本及其桥接词获得新文本.
+   * 
    * @param oldText 旧文本
    * @return 新文本
    */
   public String generateNewText(String oldText) {
     StringBuilder builder = new StringBuilder("");
     oldText = oldText.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
-    String[] wordArray = oldText.replaceAll("\\W+", " ").replaceAll("^ ",
-        "").replaceAll("$ ", "").toLowerCase().split(" ");  //容错处理
+    String[] wordArray = oldText.replaceAll("\\W+", " ").replaceAll("^ ", "").replaceAll("$ ", "")
+        .toLowerCase().split(" "); // 容错处理
     String start = wordArray[0];
     Random random = new Random();
     for (int i = 1; i < wordArray.length; i++) {
       String end = wordArray[i];
-      List<String> bridgeWords = queryBridgeWords(start, end);  //桥接词列表
+      List<String> bridgeWords = queryBridgeWords(start, end); // 桥接词列表
       builder.append(start);
       builder.append(" ");
-      if (bridgeWords != null && !bridgeWords.isEmpty()) {  //存在桥接词
-        int rand = Math.abs(random.nextInt()) % bridgeWords.size();  //随机
+      if (bridgeWords != null && !bridgeWords.isEmpty()) { // 存在桥接词
+        int rand = Math.abs(random.nextInt()) % bridgeWords.size(); // 随机
         builder.append(bridgeWords.get(rand));
         builder.append(" ");
       }
       start = end;
     }
-    builder.append(wordArray[wordArray.length-1]);  //把最后一个单词加上
+    builder.append(wordArray[wordArray.length - 1]); // 把最后一个单词加上
     return builder.toString();
   }
 
   /**
-   * Dijkstra方法查找两点间最短路径
-   * @param v0  起点
+   * Dijkstra方法查找两点间最短路径.
+   * 
+   * @param v0 起点
    * @param v1 终点
    */
-  public void Dijkstra(int v0, int v1, String label) {
-    int N = words.size();
-        int[] path = new int[N];
-        int[] dist = new int[N];
-        boolean[] visited = new boolean[N];
-        for (int j = 0;j < words.size(); j++) {
-          for (int k = 0; k < words.size(); k++) {
-            if (value[j][k] == 0)
-            {
-              value[j][k] = MAX;
-            }
-          }
+  public void dijkstra(int v0, int v1, String label) {
+    int wordSize = words.size();
+    int[] path = new int[wordSize];
+    int[] dist = new int[wordSize];
+    boolean[] visited = new boolean[wordSize];
+    for (int j = 0; j < words.size(); j++) {
+      for (int k = 0; k < words.size(); k++) {
+        if (value[j][k] == 0) {
+          value[j][k] = MAX;
         }
-        int prev = 0;
-        for (int i = 0; i < dist.length; i++) {
-            path[i] = v0;
-            dist[i] = value[v0][i];
-            visited[i] = false;
+      }
+    }
+    int prev = 0;
+    for (int i = 0; i < dist.length; i++) {
+      path[i] = v0;
+      dist[i] = value[v0][i];
+      visited[i] = false;
+    }
+    visited[v0] = true;
+    for (int v = 1; v < wordSize; v++) {
+      // 循环求得与v0距离最近的节点prev和最短距离min
+      int min = wordSize;
+      for (int j = 0; j < wordSize; j++) {
+        if (!visited[j] && dist[j] < min) {
+          min = dist[j];
+          prev = j;
         }
-        visited[v0] = true;
-        for (int v = 1; v < N; v++) {
-            // 循环求得与v0距离最近的节点prev和最短距离min
-            int min = N;
-            for (int j = 0; j < N; j++) {
-                if (!visited[j] && dist[j] < min) {
-                    min = dist[j];
-                    prev = j;
-                }
-            }
-            visited[prev] = true;
-            // 根据prev修正其他所有节点到v0的前驱节点及距离
-            for (int k = 0; k < N; k++) {
-                if (!visited[k] && (min + value[prev][k]) < dist[k]) {
-                    path[k] = prev;
-                    dist[k] = min + value[prev][k];
-                }
-            }
+      }
+      visited[prev] = true;
+      // 根据prev修正其他所有节点到v0的前驱节点及距离
+      for (int k = 0; k < wordSize; k++) {
+        if (!visited[k] && (min + value[prev][k]) < dist[k]) {
+          path[k] = prev;
+          dist[k] = min + value[prev][k];
         }
-        for (int j = 0; j < words.size(); j ++) {
-      for (int k = 0; k < words.size(); k ++) {
+      }
+    }
+    for (int j = 0; j < wordSize; j++) {
+      for (int k = 0; k < wordSize; k++) {
         pathFlag[j][k] = false;
       }
     }
-      if (dist[v1] != MAX) {
-        System.out.println(words.get(v0) + " -> " + words.get(v1) + " 最短路径的长为" + dist[v1]);
-            Stack<Integer> s = new Stack<Integer>();
-            int u = v1;
-            while (u != v0) {  //将路径压栈
-              s.push(u);
-              int v = u;
-              u = path[u];
-              pathFlag[u][v] = true;
-            }
-            s.push(v0);
-            while (!s.empty()) {
-              System.out.print(words.get(s.pop()));
-              if (!s.empty()) {
-                System.out.print(" -> ");
-              }
-            }
-            System.out.println("\n");
-            String dotFormat = getAllPath();
-          createDotGraph(dotFormat, "DotGraph" + label);
-        } else {
-          System.out.println(words.get(v0)+" -> "+words.get(v1)+" 不可达\n");
+    if (dist[v1] != MAX) {
+      System.out.println(words.get(v0) + " -> " + words.get(v1) + " 最短路径的长为" + dist[v1]);
+      Stack<Integer> s = new Stack<Integer>();
+      int u = v1;
+      while (u != v0) { // 将路径压栈
+        s.push(u);
+        int v = u;
+        u = path[u];
+        pathFlag[u][v] = true;
+      }
+      s.push(v0);
+      while (!s.empty()) {
+        System.out.print(words.get(s.pop()));
+        if (!s.empty()) {
+          System.out.print(" -> ");
         }
-      for (int j = 0;j < words.size(); j++) {
-          for (int k = 0; k < words.size(); k++) {
-            if (value[j][k] == MAX)
-            {
-              value[j][k] = 0;
-            }
-          }
+      }
+      System.out.println("\n");
+      String dotFormat = getAllPath();
+      createDotGraph(dotFormat, "DotGraph" + label);
+    } else {
+      System.out.println(words.get(v0) + " -> " + words.get(v1) + " 不可达\n");
+    }
+    for (int j = 0; j < words.size(); j++) {
+      for (int k = 0; k < words.size(); k++) {
+        if (value[j][k] == MAX) {
+          value[j][k] = 0;
         }
+      }
+    }
   }
 
   /**
@@ -313,7 +319,7 @@ public class Graph {
     word1 = word1.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
     word2 = word2.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
     if (words.contains(word1) && words.contains(word2)) {
-      Dijkstra(wordMap.get(word1), wordMap.get(word2), "Calc");
+      dijkstra(wordMap.get(word1), wordMap.get(word2), "Calc");
       new ShowImage("DotGraphCalc.jpg");
     } else {
       System.out.println("No " + word1 + " or " + word2 + " in the graph!");
@@ -330,7 +336,7 @@ public class Graph {
     int rand = Math.abs(random.nextInt()) % words.size();  //随机
     if (words.contains(word1)) {
       for (int i = 0 ; i < words.size(); i ++) {
-        Dijkstra(wordMap.get(word1), i, word1 + "To" + words.get(i));
+        dijkstra(wordMap.get(word1), i, word1 + "To" + words.get(i));
         if (i == rand) {
           new ShowImage("DotGraph" + word1 + "To" + words.get(i) + ".jpg");
         }
