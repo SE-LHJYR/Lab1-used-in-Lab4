@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -16,9 +15,10 @@ public class ShowImage extends JFrame {
   private ImageIcon image;
   private int width;
   private int height;
-  
+
   /**
    * showImage.
+   * 
    * @param imgName imgName
    */
   public ShowImage(String imgName) {
