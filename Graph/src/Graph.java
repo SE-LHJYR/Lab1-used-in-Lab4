@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
-
 public class Graph {
   public static final int MAX = 99999;
   private List<String> words;  //单词列表
@@ -31,7 +30,12 @@ public class Graph {
       List<String> tempWordList = new ArrayList<>();  //临时保存所有单词，从而分析边和权重
       while (bReader.ready()) {
         //按行读入
-        String line = bReader.readLine().replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
+        String line = bReader.readLine();
+        if (line != null) {
+          line = line.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
+        } else {
+          continue;
+        }
         line = line.replaceAll("\\W+", " ");
         String[] lineArray = line.split(" ");
         for (String word : lineArray) {
@@ -120,7 +124,7 @@ public class Graph {
       builder.append(start);
       builder.append(" ");
       if (bridgeWords != null && !bridgeWords.isEmpty()) {  //存在桥接词
-        int rand = Math.abs(random.nextInt()) % bridgeWords.size();  //随机
+        int rand = (random.nextInt() % bridgeWords.size() + bridgeWords.size()) % bridgeWords.size();  //随机
         builder.append(bridgeWords.get(rand));
         builder.append(" ");
       }
@@ -135,11 +139,11 @@ public class Graph {
    * @param v0  起点
    * @param v1 终点
    */
-  public void Dijkstra(int v0, int v1, String label) {
-    int N = words.size();
-        int[] path = new int[N];
-        int[] dist = new int[N];
-        boolean[] visited = new boolean[N];
+  public void dijkstra(int v0, int v1, String label) {
+    int numberOfWords = words.size();
+        int[] path = new int[numberOfWords];
+        int[] dist = new int[numberOfWords];
+        boolean[] visited = new boolean[numberOfWords];
         for (int j = 0;j < words.size(); j++) {
           for (int k = 0; k < words.size(); k++) {
             if (value[j][k] == 0)
@@ -155,10 +159,10 @@ public class Graph {
             visited[i] = false;
         }
         visited[v0] = true;
-        for (int v = 1; v < N; v++) {
+        for (int v = 1; v < numberOfWords; v++) {
             // 循环求得与v0距离最近的节点prev和最短距离min
-            int min = N;
-            for (int j = 0; j < N; j++) {
+            int min = numberOfWords;
+            for (int j = 0; j < numberOfWords; j++) {
                 if (!visited[j] && dist[j] < min) {
                     min = dist[j];
                     prev = j;
@@ -166,7 +170,7 @@ public class Graph {
             }
             visited[prev] = true;
             // 根据prev修正其他所有节点到v0的前驱节点及距离
-            for (int k = 0; k < N; k++) {
+            for (int k = 0; k < numberOfWords; k++) {
                 if (!visited[k] && (min + value[prev][k]) < dist[k]) {
                     path[k] = prev;
                     dist[k] = min + value[prev][k];
@@ -221,7 +225,7 @@ public class Graph {
     int[][] flag = new int[words.size()][words.size()];  //标志边是否已经被访问过
     String tempWord = null;
     Random random = new Random();
-    int startNode = Math.abs(random.nextInt()) % words.size();  //随机
+    int startNode = (random.nextInt() % words.size() + words.size()) % words.size();  //随机
     String startWord = words.get(startNode);
     System.out.println(startWord + " ");
     do {
@@ -233,7 +237,7 @@ public class Graph {
         }
       }
       if (tempWords != null && !tempWords.isEmpty()) {  //存在出边
-        int rand = Math.abs(random.nextInt()) % tempWords.size();  //随机
+        int rand = (random.nextInt() % tempWords.size() + tempWords.size()) % tempWords.size();  //随机
         tempWord = tempWords.get(rand);
         if (flag[start][rand] == 0) {
           flag[start][rand] ++;
@@ -276,7 +280,7 @@ public class Graph {
    * @return 边字符串
    */
   public String getAllPath() {  //得到图的所有边，并写成dot语法形式的字符串
-    String paths = new String();
+    String paths;
     StringBuilder tempPath = new StringBuilder();
     for (int i = 0; i < words.size(); i ++) {
       for (int j = 0; j < words.size();j ++) {
@@ -313,7 +317,7 @@ public class Graph {
     word1 = word1.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
     word2 = word2.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
     if (words.contains(word1) && words.contains(word2)) {
-      Dijkstra(wordMap.get(word1), wordMap.get(word2), "Calc");
+      dijkstra(wordMap.get(word1), wordMap.get(word2), "Calc");
       new ShowImage("DotGraphCalc.jpg");
     } else {
       System.out.println("No " + word1 + " or " + word2 + " in the graph!");
@@ -327,10 +331,10 @@ public class Graph {
   void calcShortestPath(String word1) {
     word1 = word1.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
     Random random = new Random();
-    int rand = Math.abs(random.nextInt()) % words.size();  //随机
+    int rand = (random.nextInt() % words.size() + words.size()) % words.size();  //随机
     if (words.contains(word1)) {
       for (int i = 0 ; i < words.size(); i ++) {
-        Dijkstra(wordMap.get(word1), i, word1 + "To" + words.get(i));
+        dijkstra(wordMap.get(word1), i, word1 + "To" + words.get(i));
         if (i == rand) {
           new ShowImage("DotGraph" + word1 + "To" + words.get(i) + ".jpg");
         }
@@ -373,8 +377,8 @@ public class Graph {
       System.out.println("5.随机游走（按ENTER键继续，任意键结束游走）");
       System.out.print("请选择要执行的操作: ");
       String input = in.next();
-      String startWord = new String();
-      String endWord = new String();
+      String startWord;
+      String endWord;
       switch (input) {
         case "1":
           System.out.print("请输入两个单词（以空格隔开）：");
