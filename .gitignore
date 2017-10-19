@@ -1,0 +1,15 @@
+/.metadata/
+
+/.recommenders/
+/RemoteSystemsTempFiles/
+*.jpg
+*.dot
+Graph/bin/
+.settings/
+.classpath
+.project
+/Graph/reports/
+/Graph/.eclipse-pmd
+
+
+
