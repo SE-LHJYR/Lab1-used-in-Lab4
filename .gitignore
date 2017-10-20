@@ -10,6 +10,7 @@ Graph/bin/
 .project
 /Graph/reports/
 /Graph/.eclipse-pmd
+*.class
 
 
 
