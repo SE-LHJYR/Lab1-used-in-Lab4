@@ -17,57 +17,63 @@ import java.util.Scanner;
 import java.util.Stack;
 
 /**.
- * 
+ *
  *
  * @author Gorge Bush
  */
 public class Graph {
   /**.
-   * 
+   *
    *
    * @author Gorge Bush
    */
   public static final String FORMAT = "[^ a-zA-Z,.?!:;\"]+";
   /**.
-   * 
+   *
    *
    * @author Gorge Bush
    */
   public static final String TYPE = "jpg";
   /**.
-   * 
+   *
    *
    * @author Gorge Bush
    */
   public static final int MAX = 99999;
   /**.
-   * 
+   *
    *
    * @author Gorge Bush
    */
   private transient List<String> words; // 单词列表
   /**.
-   * 
+   *
    *
    * @author Gorge Bush
    */
   private transient Map<String, Integer> wordMap; // 将单词映射为编号
   /**.
-   * 
+   *
    *
    * @author Gorge Bush
    */
   private transient int[][] value; // 表示图的二维矩阵
   /**.
-   * 
+   *
    *
    * @author Gorge Bush
    */
   private transient boolean[][] pathFlag; // 表示最短路径的矩阵，便于将路径高亮显示
+  /**.
+   *
+   *
+   * @author Gorge Bush
+   */
+  private transient ShowImage myImage; // 表示最短路径的矩阵，便于将路径高亮显示
 
   /**
    * 读取文件，处理文件内容.
-   * 
+   *
    * @param filePath 要读取的文件路径
    * @return 读取成功返回true
    */
@@ -133,7 +139,7 @@ public class Graph {
 
   /**
    * 查询两个单词间的桥接词.
-   * 
+   *
    * @param tmpStartWord 单词1
    * @param tmpEndWord 单词2
    * @return 单词1或2如不存在则返回Null，否则返回桥接词List
@@ -160,7 +166,7 @@ public class Graph {
 
   /**
    * 根据文本及其桥接词获得新文本.
-   * 
+   *
    * @param tmpOldText 旧文本
    * @return 新文本
    */
@@ -190,7 +196,7 @@ public class Graph {
 
   /**
    * Dijkstra方法查找两点间最短路径.
-   * 
+   *
    * @param startV 起点
    * @param endV 终点
    */
@@ -247,7 +253,7 @@ public class Graph {
       if (dist[pend] == MAX) {
         System.out.println(words.get(startV) + " -> " + words.get(pend) + " 不可达\n");
       } else {
-        System.out.println(words.get(startV) + " -> " + words.get(pend) 
+        System.out.println(words.get(startV) + " -> " + words.get(pend)
             + " 最短路径的长为" + dist[pend]);
         stack.clear();
         int u = pend;
@@ -282,7 +288,7 @@ public class Graph {
 
   /**
    * 随机游走，输出由起始单词生成的文本，按空格停止遍历.
-   * 
+   *
    *
    * <p>startWord 起始单词
    */
@@ -328,7 +334,7 @@ public class Graph {
 
   /**
    * 将图生成为.jpg文件保存.
-   * 
+   *
    * @param dotFormat 图中所有路径的字符串
    * @param fileName 生成的图文件
    */
@@ -345,7 +351,7 @@ public class Graph {
 
   /**
    * 得到图中所有边的字符串.
-   * 
+   *
    * @return 边字符串
    */
   public String getAllPath() { // 得到图的所有边，并写成dot语法形式的字符串
@@ -374,12 +380,12 @@ public class Graph {
   public void showDirectedGraph() {
     final String dotFormat = getAllPath();
     createDotGraph(dotFormat, "DotGraph");
-    new ShowImage("DotGraph.jpg");
+    myImage = new ShowImage("DotGraph.jpg");
   }
 
   /**
    * 得到两单词间的最短路径.
-   * 
+   *
    * @param tmpWord1 起始单词
    * @param tmpWord2 终止单词
    */
@@ -388,7 +394,7 @@ public class Graph {
     final String word2 = tmpWord2.replaceAll(FORMAT, "");
     if (words.contains(word1) && words.contains(word2)) {
       dijkstra(wordMap.get(word1), wordMap.get(word2), "Calc");
-      new ShowImage("DotGraphCalc.jpg");
+      myImage.setImage("DotGraphCalc.jpg");
     } else {
       System.out.println("No " + word1 + " or " + word2 + " in the graph!");
     }
@@ -396,14 +402,14 @@ public class Graph {
 
   /**
    * 得到某单词到任意单词间的最短路径.
-   * 
+   *
    * @param tmpWord1 起始单词
    */
   public void calcShortestPath(String tmpWord1) {
     final String word1 = tmpWord1.replaceAll(FORMAT, "");
-    if (words.contains(word1)) { 
+    if (words.contains(word1)) {
       dijkstra(wordMap.get(word1), -1, word1 + "ToAll");
-      new ShowImage("DotGraph" + word1 + "To" + "All" + ".jpg");
+      myImage.setImage("DotGraph" + word1 + "To" + "All" + ".jpg");
     } else {
       System.out.println("No " + word1 + " in the graph!");
     }
@@ -418,7 +424,7 @@ public class Graph {
 
   /**
    * 主程序入口.
-   * 
+   *
    * @param args 系统参数
    */
   public static void main(String[] args) {
