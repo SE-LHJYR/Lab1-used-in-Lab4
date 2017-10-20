@@ -1,3 +1,5 @@
+package mygraph;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,17 +10,60 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Stack;
 
+/**.
+ * 
+ *
+ * @author Gorge Bush
+ */
 public class Graph {
+  /**.
+   * 
+   *
+   * @author Gorge Bush
+   */
+  public static final String FORMAT = "[^ a-zA-Z,.?!:;\"]+";
+  /**.
+   * 
+   *
+   * @author Gorge Bush
+   */
+  public static final String TYPE = "jpg";
+  /**.
+   * 
+   *
+   * @author Gorge Bush
+   */
   public static final int MAX = 99999;
-  private List<String> words; // 单词列表
-  private Map<String, Integer> wordMap; // 将单词映射为编号
-  private int[][] value; // 表示图的二维矩阵
-  private boolean[][] pathFlag; // 表示最短路径的矩阵，便于将路径高亮显示
+  /**.
+   * 
+   *
+   * @author Gorge Bush
+   */
+  private transient List<String> words; // 单词列表
+  /**.
+   * 
+   *
+   * @author Gorge Bush
+   */
+  private transient Map<String, Integer> wordMap; // 将单词映射为编号
+  /**.
+   * 
+   *
+   * @author Gorge Bush
+   */
+  private transient int[][] value; // 表示图的二维矩阵
+  /**.
+   * 
+   *
+   * @author Gorge Bush
+   */
+  private transient boolean[][] pathFlag; // 表示最短路径的矩阵，便于将路径高亮显示
 
   /**
    * 读取文件，处理文件内容.
@@ -26,27 +71,28 @@ public class Graph {
    * @param filePath 要读取的文件路径
    * @return 读取成功返回true
    */
-  private boolean createDirectedGraph(String filename) {
-    File inputFile = new File(filename);
+  private boolean createDirectedGraph(final String filename) {
+    final File inputFile = new File(filename);
     try {
-      BufferedReader buffReader =
+      final BufferedReader buffReader =
           new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), "utf8"));
       words = new ArrayList<>();
       wordMap = new HashMap<>();
-      List<String> tempWordList = new ArrayList<>(); // 临时保存所有单词，从而分析边和权重
+      final List<String> tempWordList = new ArrayList<>(); // 临时保存所有单词，从而分析边和权重
+      String line;
       while (buffReader.ready()) {
         // 按行读入
-        String line = buffReader.readLine();
-        if (line != null) {
-          line = line.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
-        } else {
+        final String inLine = buffReader.readLine();
+        if (inLine == null) {
           continue;
+        } else {
+          line = inLine.replaceAll(FORMAT, "");
         }
         line = line.replaceAll("\\W+", " ");
-        String[] lineArray = line.split(" ");
+        final String[] lineArray = line.split(" ");
         for (String word : lineArray) {
           if (!word.equals("")) { // 空格处理
-            word = word.toLowerCase(); // 均视为小写
+            word = word.toLowerCase(Locale.US); // 均视为小写
             tempWordList.add(word);
             if (!wordMap.containsKey(word)) {
               // 尚未加入words，建立新的映射
@@ -66,7 +112,7 @@ public class Graph {
       }
       String startWord = words.get(0); // 边的起点
       for (int i = 1; i < tempWordList.size(); i++) {
-        String endWord = tempWordList.get(i);
+        final String endWord = tempWordList.get(i);
         value[wordMap.get(startWord)][wordMap.get(endWord)]++; // 权重+1
         startWord = endWord;
       }
@@ -88,17 +134,17 @@ public class Graph {
   /**
    * 查询两个单词间的桥接词.
    * 
-   * @param startWord 单词1
-   * @param endWord 单词2
+   * @param tmpStartWord 单词1
+   * @param tmpEndWord 单词2
    * @return 单词1或2如不存在则返回Null，否则返回桥接词List
    */
-  public List<String> queryBridgeWords(String startWord, String endWord) {
-    startWord = startWord.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
-    endWord = endWord.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
+  public List<String> queryBridgeWords(final String tmpStartWord, final String tmpEndWord) {
+    final String startWord = tmpStartWord.replaceAll(FORMAT, "");
+    final String endWord = tmpEndWord.replaceAll(FORMAT, "");
     if (wordMap.containsKey(startWord) && wordMap.containsKey(endWord)) {
-      List<String> result = new ArrayList<>();
-      int startIndex = wordMap.get(startWord); // 起点
-      int endIndex = wordMap.get(endWord); // 终点
+      final List<String> result = new ArrayList<>();
+      final int startIndex = wordMap.get(startWord); // 起点
+      final int endIndex = wordMap.get(endWord); // 终点
       for (int i = 0; i < value[startIndex].length; i++) {
         // 遍历起点的所有邻接点
         if (value[startIndex][i] > 0 && value[i][endIndex] > 0) {
@@ -110,31 +156,31 @@ public class Graph {
     } else {
       return null;
     }
-
   }
 
   /**
    * 根据文本及其桥接词获得新文本.
    * 
-   * @param oldText 旧文本
+   * @param tmpOldText 旧文本
    * @return 新文本
    */
-  public String generateNewText(String oldText) {
-    StringBuilder builder = new StringBuilder("");
-    oldText = oldText.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
-    String[] wordArray = oldText.replaceAll("\\W+", " ").replaceAll("^ ", "").replaceAll("$ ", "")
-        .toLowerCase().split(" "); // 容错处理
+  public String generateNewText(final String tmpOldText) {
+    final StringBuilder builder = new StringBuilder("");
+    final String oldText = tmpOldText.replaceAll(FORMAT, "");
+    final String[] wordArray = oldText.replaceAll("\\W+", " ").replaceAll("^ ", "")
+        .replaceAll("$ ", "").toLowerCase(Locale.US).split(" "); // 容错处理
     String start = wordArray[0];
-    Random random = new Random();
+    final Random random = new Random();
     for (int i = 1; i < wordArray.length; i++) {
-      String end = wordArray[i];
-      List<String> bridgeWords = queryBridgeWords(start, end); // 桥接词列表
+      final String end = wordArray[i];
+      final List<String> bridgeWords = queryBridgeWords(start, end); // 桥接词列表
       builder.append(start);
-      builder.append(" ");
-      if (bridgeWords != null && !bridgeWords.isEmpty()) {  //存在桥接词
-        int rand = (random.nextInt() % bridgeWords.size() + bridgeWords.size()) % bridgeWords.size();  //随机
+      builder.append(' ');
+      if (bridgeWords != null && !bridgeWords.isEmpty()) { // 存在桥接词
+        final int rand =
+            (random.nextInt() % bridgeWords.size() + bridgeWords.size()) % bridgeWords.size();//随机
         builder.append(bridgeWords.get(rand));
-        builder.append(" ");
+        builder.append(' ');
       }
       start = end;
     }
@@ -145,11 +191,11 @@ public class Graph {
   /**
    * Dijkstra方法查找两点间最短路径.
    * 
-   * @param v0 起点
-   * @param v1 终点
+   * @param startV 起点
+   * @param endV 终点
    */
-  public void dijkstra(int v0, int v1, String label) {
-    int wordSize = words.size();
+  public void dijkstra(final int startV, final int endV, final String label) {
+    final int wordSize = words.size();
     int[] path = new int[wordSize];
     int[] dist = new int[wordSize];
     boolean[] visited = new boolean[wordSize];
@@ -162,11 +208,11 @@ public class Graph {
     }
     int prev = 0;
     for (int i = 0; i < dist.length; i++) {
-      path[i] = v0;
-      dist[i] = value[v0][i];
+      path[i] = startV;
+      dist[i] = value[startV][i];
       visited[i] = false;
     }
-    visited[v0] = true;
+    visited[startV] = true;
     for (int v = 1; v < wordSize; v++) {
       // 循环求得与v0距离最近的节点prev和最短距离min
       int min = wordSize;
@@ -190,28 +236,29 @@ public class Graph {
         pathFlag[j][k] = false;
       }
     }
-    if (dist[v1] != MAX) {
-      System.out.println(words.get(v0) + " -> " + words.get(v1) + " 最短路径的长为" + dist[v1]);
-      Stack<Integer> s = new Stack<Integer>();
-      int u = v1;
-      while (u != v0) { // 将路径压栈
-        s.push(u);
-        int v = u;
+    if (dist[endV] == MAX) {
+      System.out.println(words.get(startV) + " -> " + words.get(endV) + " 不可达\n");
+    } else {
+      System.out.println(words.get(startV) + " -> " + words.get(endV) + " 最短路径的长为" + dist[endV]);
+      final Stack<Integer> stack = new Stack<Integer>();
+      int u = endV;
+      while (u != startV) { // 将路径压栈
+        stack.push(u);
+        final int v = u;
         u = path[u];
         pathFlag[u][v] = true;
       }
-      s.push(v0);
-      while (!s.empty()) {
-        System.out.print(words.get(s.pop()));
-        if (!s.empty()) {
+      stack.push(startV);
+      while (!stack.empty()) {
+        System.out.print(words.get(stack.pop()));
+        if (!stack.empty()) {
           System.out.print(" -> ");
         }
       }
       System.out.println("\n");
-      String dotFormat = getAllPath();
+      final String dotFormat = getAllPath();
       createDotGraph(dotFormat, "DotGraph" + label);
-    } else {
-      System.out.println(words.get(v0) + " -> " + words.get(v1) + " 不可达\n");
+
     }
     for (int j = 0; j < words.size(); j++) {
       for (int k = 0; k < words.size(); k++) {
@@ -225,79 +272,83 @@ public class Graph {
   /**
    * 随机游走，输出由起始单词生成的文本，按空格停止遍历.
    * 
+   *
    * <p>startWord 起始单词
    */
   public void randomWalk(Scanner cin) {
-    List<String> tempWords = new ArrayList<>();  //临时保存startWord出边指向的所有单词
-    int[][] flag = new int[words.size()][words.size()];  //标志边是否已经被访问过
+    final List<String> tempWords = new ArrayList<>(); // 临时保存startWord出边指向的所有单词
+    int[][] flag = new int[words.size()][words.size()]; // 标志边是否已经被访问过
     String tempWord = null;
-    Random random = new Random();
-    int startNode = (random.nextInt() % words.size() + words.size()) % words.size();  //随机
+    final Random random = new Random();
+    final int startNode = (random.nextInt() % words.size() + words.size()) % words.size(); // 随机
     String startWord = words.get(startNode);
     System.out.println(startWord + " ");
     do {
-      int start = wordMap.get(startWord);
+      final int start = wordMap.get(startWord);
       tempWords.clear();
-      for (int i = 0; i < value[start].length; i ++) {
+      for (int i = 0; i < value[start].length; i++) {
         if (value[start][i] != 0 && value[start][i] != MAX) {
           tempWords.add(words.get(i));
         }
       }
-      if (tempWords != null && !tempWords.isEmpty()) {  //存在出边
-        int rand = (random.nextInt() % tempWords.size() + tempWords.size()) % tempWords.size();  //随机
+      if (tempWords == null || tempWords.isEmpty()) {
+        break;
+      } else {
+        // 存在出边
+        final int rand =
+            (random.nextInt() % tempWords.size() + tempWords.size()) % tempWords.size(); // 随机
         tempWord = tempWords.get(rand);
         if (flag[start][rand] == 0) {
-          flag[start][rand] ++;
+          flag[start][rand]++;
         } else {
           break;
         }
-      } else {
-        break;
       }
       startWord = tempWord;
-      String input = cin.nextLine();
-      if (input.equals("")) {  //按ENTER键继续游走
+      final String input = cin.nextLine();
+      if (input.equals("")) { // 按ENTER键继续游走
         System.out.print(tempWord + " ");
-      } else {  //按任意键+ENTER键停止游走
+      } else { // 按任意键+ENTER键停止游走
         break;
       }
-    } while (tempWords != null && !tempWords.isEmpty());  //不存在出边时跳出循环
+    } while (tempWords != null && !tempWords.isEmpty()); // 不存在出边时跳出循环
     System.out.println("\n游走完毕");
   }
 
   /**
    * 将图生成为.jpg文件保存.
+   * 
    * @param dotFormat 图中所有路径的字符串
    * @param fileName 生成的图文件
    */
-  public static void createDotGraph(String dotFormat,String fileName) {
+  public static void createDotGraph(String dotFormat, String fileName) {
     GraphViz gv = new GraphViz();
     gv.addln(gv.start_graph());
     gv.add(dotFormat);
     gv.addln(gv.end_graph());
-    String type = "jpg";
     gv.decreaseDpi();
     gv.decreaseDpi();
-    File out = new File(fileName + "." + type);
-    gv.writeGraphToFile(gv.getGraph(gv.getDotSource(), type), out);
+    final File out = new File(fileName + "." + TYPE);
+    gv.writeGraphToFile(gv.getGraph(gv.getDotSource(), TYPE), out);
   }
 
   /**
    * 得到图中所有边的字符串.
+   * 
    * @return 边字符串
    */
-  public String getAllPath() {  //得到图的所有边，并写成dot语法形式的字符串
+  public String getAllPath() { // 得到图的所有边，并写成dot语法形式的字符串
     String paths;
-    StringBuilder tempPath = new StringBuilder();
-    for (int i = 0; i < words.size(); i ++) {
-      for (int j = 0; j < words.size();j ++) {
+    final StringBuilder tempPath = new StringBuilder();
+    for (int i = 0; i < words.size(); i++) {
+      for (int j = 0; j < words.size(); j++) {
         if (value[i][j] != 0 && value[i][j] != MAX) {
           if (pathFlag[i][j]) {
-            tempPath.append(words.get(i) + "->" + words.get(j) 
-                + "[label=\"" + value[i][j] + "\", color=\"red\"];");
+            tempPath.append(words.get(i) + "->" + words.get(j) + "[label=\"" + value[i][j]
+                + "\", color=\"red\"];");
           } else {
-            tempPath.append(words.get(i) + "->" + words.get(j) 
-                + "[label=\"" + value[i][j] + "\"];");
+            tempPath
+                .append(words.get(i) + "->" + words.get(j) + "[label=\"" + value[i][j] + "\"];");
           }
         }
       }
@@ -309,20 +360,21 @@ public class Graph {
   /**
    * 创建图文件.
    */
-  void showDirectedGraph() {
-    String dotFormat = getAllPath();
+  public void showDirectedGraph() {
+    final String dotFormat = getAllPath();
     createDotGraph(dotFormat, "DotGraph");
     new ShowImage("DotGraph.jpg");
   }
 
   /**
    * 得到两单词间的最短路径.
-   * @param word1 起始单词
-   * @param word2 终止单词
+   * 
+   * @param tmpWord1 起始单词
+   * @param tmpWord2 终止单词
    */
-  void calcShortestPath(String word1, String word2) {
-    word1 = word1.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
-    word2 = word2.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
+  public void calcShortestPath(String tmpWord1, String tmpWord2) {
+    final String word1 = tmpWord1.replaceAll(FORMAT, "");
+    final String word2 = tmpWord2.replaceAll(FORMAT, "");
     if (words.contains(word1) && words.contains(word2)) {
       dijkstra(wordMap.get(word1), wordMap.get(word2), "Calc");
       new ShowImage("DotGraphCalc.jpg");
@@ -333,14 +385,15 @@ public class Graph {
 
   /**
    * 得到某单词到任意单词间的最短路径.
-   * @param word1 起始单词
+   * 
+   * @param tmpWord1 起始单词
    */
-  void calcShortestPath(String word1) {
-    word1 = word1.replaceAll("[^ a-zA-Z,.?!:;\"]+", "");
-    Random random = new Random();
-    int rand = (random.nextInt() % words.size() + words.size()) % words.size();  //随机
+  public void calcShortestPath(String tmpWord1) {
+    final String word1 = tmpWord1.replaceAll(FORMAT, "");
+    final Random random = new Random();
+    final int rand = (random.nextInt() % words.size() + words.size()) % words.size(); // 随机
     if (words.contains(word1)) {
-      for (int i = 0 ; i < words.size(); i ++) {
+      for (int i = 0; i < words.size(); i++) {
         dijkstra(wordMap.get(word1), i, word1 + "To" + words.get(i));
         if (i == rand) {
           new ShowImage("DotGraph" + word1 + "To" + words.get(i) + ".jpg");
@@ -360,12 +413,13 @@ public class Graph {
 
   /**
    * 主程序入口.
+   * 
    * @param args 系统参数
    */
   public static void main(String[] args) {
-    Graph graph = new Graph();
+    final Graph graph = new Graph();
     System.out.print("请输入文件名（以.txt结尾）：");
-    Scanner in = new Scanner(System.in);
+    final Scanner in = new Scanner(System.in);
     String filename = in.next();
     File file = new File(filename);
     while (!file.exists()) {
@@ -383,7 +437,7 @@ public class Graph {
       System.out.println("4.查找某个单词到任一单词的最短路径");
       System.out.println("5.随机游走（按ENTER键继续，任意键结束游走）");
       System.out.print("请选择要执行的操作: ");
-      String input = in.next();
+      final String input = in.next();
       String startWord;
       String endWord;
       switch (input) {
@@ -391,20 +445,21 @@ public class Graph {
           System.out.print("请输入两个单词（以空格隔开）：");
           startWord = in.next();
           endWord = in.next();
-          List<String> bridgeWords = graph.queryBridgeWords(startWord, endWord);
-          if (bridgeWords != null) {
-            if (bridgeWords.size() != 0) {
-              System.out.println("The bridge words from " 
-                  + startWord + " to " + endWord + " are: ");
-              for (String i : bridgeWords) {
+          final List<String> bridgeWords = graph.queryBridgeWords(startWord, endWord);
+          if (bridgeWords == null) {
+            System.out.println("No " + startWord + " or " + endWord + " in the graph!");
+          } else {
+            if (bridgeWords.size() == 0) {
+              System.out.println("No bridge words from " + startWord + " to " + endWord);
+            } else {
+              System.out
+                  .println("The bridge words from " + startWord + " to " + endWord + " are: ");
+              for (final String i : bridgeWords) {
                 System.out.print(i + " ");
               }
-            } else {
-              System.out.println("No bridge words from " + startWord + " to " + endWord);
             }
             System.out.print("\n");
-          } else {
-            System.out.println("No " + startWord + " or " + endWord + " in the graph!");
+
           }
           System.out.print("\n");
           break;

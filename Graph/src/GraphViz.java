@@ -1,3 +1,5 @@
+package mygraph;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -44,20 +46,20 @@ import java.util.Properties;
  *          file
  * @version v0.2, 2010/07/22 (July) -- bug fix
  * @version v0.1, 2003/12/04 (December) -- first release
- * @author Laszlo Szathmary (<a href="jabba.laci@gmail.com">jabba.laci@gmail.com</a>)
+ * @author Laszlo Szathmary ( <a href="jabba.laci@gmail.com">jabba.laci@gmail.com</a>)
  */
 public class GraphViz {
   /**
    * Detects the client's operating system.
    */
-  private final static String osName = System.getProperty("os.name").replaceAll("\\s", "");
+  private static final  String osName = System.getProperty("os.name").replaceAll("\\s", "");
 
   /**
    * Load the config.properties file.
    */
-  private final static String cfgProp = "config/config.properties";
-  private final static Properties configFile = new Properties() {
-    private final static long serialVersionUID = 1L;
+  private static final String cfgProp = "config/config.properties";
+  private static final Properties configFile = new Properties() {
+    private static final long serialVersionUID = 1L;
     {
       try {
         load(new FileInputStream(cfgProp));
@@ -157,6 +159,7 @@ public class GraphViz {
 
   /**
    * Returns the graph as an image in binary format.
+   * 
    * @return A byte array containing the image of the graph.
    */
   public byte[] getGraph(String dotSource, String type) {
