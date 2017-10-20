@@ -52,7 +52,7 @@ public class GraphViz {
   /**
    * Detects the client's operating system.
    */
-  private static final  String osName = System.getProperty("os.name").replaceAll("\\s", "");
+  private static final String osName = System.getProperty("os.name").replaceAll("\\s", "");
 
   /**
    * Load the config.properties file.
@@ -72,7 +72,7 @@ public class GraphViz {
   /**
    * The dir. where temporary files will be created.
    */
-  private static String TEMP_DIR = "test/tmpDir";
+  private static String TEMP_DIR = configFile.getProperty("tempDirFor" + osName);
 
   /**
    * Where is your dot program located? It will be called externally.
@@ -121,7 +121,12 @@ public class GraphViz {
   /**
    * Constructor: creates a new GraphViz object that will contain a graph.
    */
-  public GraphViz() {}
+  public GraphViz() {
+    File file = new File(TEMP_DIR);
+    if (!file.exists()) {
+      file.mkdirs();
+    }
+  }
 
   /**
    * Returns the graph's source description in dot language.

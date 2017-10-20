@@ -19,12 +19,13 @@ public class ShowImage extends JFrame {
   private int height;
 
   /**
-   * showImage.
+   * setImage.
    * 
    * @param imgName imgName
    */
-  public ShowImage(String imgName) {
+  public void setImage(String imgName) {
     try {
+
       BufferedImage sourceImage = ImageIO.read(new FileInputStream(imgName));
       width = sourceImage.getWidth();
       height = sourceImage.getHeight();
@@ -52,6 +53,17 @@ public class ShowImage extends JFrame {
 
     this.add(jlb);
     jlb.setSize(width, height);
+    this.setVisible(false);
+    this.repaint();
     this.setVisible(true);
+  }
+  /**
+   * setImage.
+   * 
+   * @param imgName imgName
+   */
+  
+  public ShowImage(String imgName) {
+    this.setImage(imgName);
   }
 }

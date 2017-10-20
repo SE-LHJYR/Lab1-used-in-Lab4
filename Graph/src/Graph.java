@@ -64,6 +64,12 @@ public class Graph {
    * @author Gorge Bush
    */
   private transient boolean[][] pathFlag; // 表示最短路径的矩阵，便于将路径高亮显示
+  /**.
+   * 
+   *
+   * @author Gorge Bush
+   */
+  private transient ShowImage myImage; // 表示最短路径的矩阵，便于将路径高亮显示
 
   /**
    * 读取文件，处理文件内容.
@@ -363,7 +369,7 @@ public class Graph {
   public void showDirectedGraph() {
     final String dotFormat = getAllPath();
     createDotGraph(dotFormat, "DotGraph");
-    new ShowImage("DotGraph.jpg");
+    myImage = new ShowImage("DotGraph.jpg");
   }
 
   /**
@@ -377,7 +383,7 @@ public class Graph {
     final String word2 = tmpWord2.replaceAll(FORMAT, "");
     if (words.contains(word1) && words.contains(word2)) {
       dijkstra(wordMap.get(word1), wordMap.get(word2), "Calc");
-      new ShowImage("DotGraphCalc.jpg");
+      myImage.setImage("DotGraphCalc.jpg");
     } else {
       System.out.println("No " + word1 + " or " + word2 + " in the graph!");
     }
@@ -396,7 +402,7 @@ public class Graph {
       for (int i = 0; i < words.size(); i++) {
         dijkstra(wordMap.get(word1), i, word1 + "To" + words.get(i));
         if (i == rand) {
-          new ShowImage("DotGraph" + word1 + "To" + words.get(i) + ".jpg");
+          myImage.setImage("DotGraph" + word1 + "To" + words.get(i) + ".jpg");
         }
       }
     } else {
