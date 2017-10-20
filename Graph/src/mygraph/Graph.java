@@ -328,8 +328,8 @@ public class Graph {
     gv.addln(gv.end_graph());
     gv.decreaseDpi();
     gv.decreaseDpi();
-    final File out = new File(fileName + "." + TYPE);
-    gv.writeGraphToFile(gv.getGraph(gv.getDotSource(), TYPE), out);
+    //final File out = new File(fileName + "." + TYPE);
+    //gv.writeGraphToFile(gv.getGraph(gv.getDotSource(), TYPE), out);
   }
 
   /**
