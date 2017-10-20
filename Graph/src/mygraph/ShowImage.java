@@ -45,7 +45,7 @@ public class ShowImage extends JFrame {
     this.setSize(width, height);
     this.setLayout(null);
 
-    image = new ImageIcon("DotGraph.jpg");
+    image = new ImageIcon(imgName);
     Image img = image.getImage();
     img = img.getScaledInstance(width, height, Image.SCALE_DEFAULT);
     image.setImage(img);
