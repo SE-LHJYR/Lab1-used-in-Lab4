@@ -236,29 +236,40 @@ public class Graph {
         pathFlag[j][k] = false;
       }
     }
-    if (dist[endV] == MAX) {
-      System.out.println(words.get(startV) + " -> " + words.get(endV) + " 不可达\n");
-    } else {
-      System.out.println(words.get(startV) + " -> " + words.get(endV) + " 最短路径的长为" + dist[endV]);
-      final Stack<Integer> stack = new Stack<Integer>();
-      int u = endV;
-      while (u != startV) { // 将路径压栈
-        stack.push(u);
-        final int v = u;
-        u = path[u];
-        pathFlag[u][v] = true;
-      }
-      stack.push(startV);
-      while (!stack.empty()) {
-        System.out.print(words.get(stack.pop()));
-        if (!stack.empty()) {
-          System.out.print(" -> ");
+    int st = endV;
+    int ed = endV + 1;
+    if (endV == -1) {
+      st = 0;
+      ed = words.size();
+    }
+    final Stack<Integer> stack = new Stack<Integer>();
+    for (int pend = st; pend < ed; pend++) {
+      if (dist[pend] == MAX) {
+        System.out.println(words.get(startV) + " -> " + words.get(pend) + " 不可达\n");
+      } else {
+        System.out.println(words.get(startV) + " -> " + words.get(pend) 
+            + " 最短路径的长为" + dist[pend]);
+        stack.clear();
+        int u = pend;
+        int v;
+        while (u != startV) { // 将路径压栈
+          stack.push(u);
+          v = u;
+          u = path[u];
+          pathFlag[u][v] = true;
         }
-      }
-      System.out.println("\n");
-      final String dotFormat = getAllPath();
-      createDotGraph(dotFormat, "DotGraph" + label);
+        stack.push(startV);
+        while (!stack.empty()) {
+          System.out.print(words.get(stack.pop()));
+          if (!stack.empty()) {
+            System.out.print(" -> ");
+          }
+        }
+        System.out.println("\n");
 
+        final String dotFormat = getAllPath();
+        createDotGraph(dotFormat, "DotGraph" + label);
+      }
     }
     for (int j = 0; j < words.size(); j++) {
       for (int k = 0; k < words.size(); k++) {
@@ -328,8 +339,8 @@ public class Graph {
     gv.addln(gv.end_graph());
     gv.decreaseDpi();
     gv.decreaseDpi();
-    //final File out = new File(fileName + "." + TYPE);
-    //gv.writeGraphToFile(gv.getGraph(gv.getDotSource(), TYPE), out);
+    final File out = new File(fileName + "." + TYPE);
+    gv.writeGraphToFile(gv.getGraph(gv.getDotSource(), TYPE), out);
   }
 
   /**
@@ -390,15 +401,9 @@ public class Graph {
    */
   public void calcShortestPath(String tmpWord1) {
     final String word1 = tmpWord1.replaceAll(FORMAT, "");
-    final Random random = new Random();
-    final int rand = (random.nextInt() % words.size() + words.size()) % words.size(); // 随机
-    if (words.contains(word1)) {
-      for (int i = 0; i < words.size(); i++) {
-        dijkstra(wordMap.get(word1), i, word1 + "To" + words.get(i));
-        if (i == rand) {
-          new ShowImage("DotGraph" + word1 + "To" + words.get(i) + ".jpg");
-        }
-      }
+    if (words.contains(word1)) { 
+      dijkstra(wordMap.get(word1), -1, word1 + "ToAll");
+      new ShowImage("DotGraph" + word1 + "To" + "All" + ".jpg");
     } else {
       System.out.println("No " + word1 + " in the graph!");
     }
@@ -487,9 +492,6 @@ public class Graph {
         default:
           flag = true;
           break;
-      }
-      if (flag) {
-        System.exit(0);;
       }
     }
     in.close();
